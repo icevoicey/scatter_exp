@@ -96,6 +96,28 @@ int fb_cross(double x[3], double y[3], double z[3])
 	return(0);
 }
 
+/* the rotational martrix */
+int fb_rotat(double A[3], double B[3], int n, double theta)
+{
+	if (n==0){
+		B[0]=A[0];
+		B[1]=cos(theta)*A[1]-sin(theta)*A[2];
+		B[2]=sin(theta)*A[1]+cos(theta)*A[2];		
+	}		
+	if (n==1){
+		B[1]=A[1];
+		B[0]=cos(theta)*A[0]-sin(theta)*A[2];
+		B[2]=sin(theta)*A[0]+cos(theta)*A[2];	
+	}
+	if (n==2){
+		B[2]=A[2];
+		B[0]=cos(theta)*A[0]-sin(theta)*A[1];
+		B[1]=sin(theta)*A[0]+cos(theta)*A[1];	
+	}
+	return(0);
+}
+
+
 /* something to calculate the angular momentum */
 int fb_angmom(fb_obj_t *star, int nstar, double L[3])
 {

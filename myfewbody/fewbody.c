@@ -41,7 +41,6 @@ fb_ret_t fewbody(fb_input_t input, fb_hier_t *hier, double *t)
 	double Ei, E, Lint[3], Li[3], L[3], DeltaL[3];
 	double s2, s2prev=GSL_POSINF, s2prevprev=GSL_POSINF, s2minprev=GSL_POSINF, s2max=0.0, s2min;
 	struct tms firsttimebuf, currtimebuf;
-	clock_t firstclock, currclock;
 	fb_hier_t phier;
 	fb_ret_t retval;
 	fb_nonks_params_t nonks_params;
@@ -165,7 +164,6 @@ fb_ret_t fewbody(fb_input_t input, fb_hier_t *hier, double *t)
 	tout = *t;
 	texpand = 0.0;
 	clk_tck = sysconf(_SC_CLK_TCK);
-	firstclock = times(&firsttimebuf);
 	retval.tcpu = 0.0;
 	while (*t < input.tstop && retval.tcpu < input.tcpustop && !done) {
 		/* take one step */
@@ -409,7 +407,6 @@ fb_ret_t fewbody(fb_input_t input, fb_hier_t *hier, double *t)
 
 		/* update variables that change on every integration step */
 		retval.count++;
-		currclock = times(&currtimebuf);
 		retval.tcpu = ((double) (currtimebuf.tms_utime + currtimebuf.tms_stime - firsttimebuf.tms_utime - firsttimebuf.tms_stime))/((double) clk_tck);
 	}
 	

@@ -47,8 +47,8 @@
 #define FB_SEED 1
 #define FB_DEBUG 0
 
-#define FB_A34MIN (0.1 * FB_CONST_AU)
-#define FB_A34MAX (0.1 * FB_CONST_AU)
+#define FB_A34MIN (0.01 * FB_CONST_AU)
+#define FB_A34MAX (1.2 * FB_CONST_AU)
 #define FB_E34MIN 0.0
 #define FB_E34MAX 0.0
 #define FB_PINDEX 5000000 /* total times we need */

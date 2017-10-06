@@ -236,6 +236,7 @@ double fb_cub(double x);
 double fb_dot(double x[3], double y[3]);
 double fb_mod(double x[3]);
 int fb_cross(double x[3], double y[3], double z[3]);
+int fb_rotat(double A[3], double B[3], int n, double theta);
 int fb_angmom(fb_obj_t *star, int nstar, double L[3]);
 void fb_angmomint(fb_obj_t *star, int nstar, double L[3]);
 double fb_einttot(fb_obj_t *star, int nstar);
