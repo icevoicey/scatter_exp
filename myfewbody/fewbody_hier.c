@@ -282,8 +282,12 @@ void fb_randorient(fb_obj_t *obj, gsl_rng *rng)
 	int i;
 	double theta, phi, omega, xp[3], yp[3], zp[3];
 	
-	/* random angles */
-	theta = acos(2.0 * gsl_rng_uniform(rng) - 1.0);
+	/* random angles:
+	theta is the inclination with acos(theta) in (0,1);
+	phi is the right ascension of ascending node in (0,2pi);
+	omega is the argument of perigee in (0,2pi);
+	oj->mean_anom is the initial phase of binary  */
+	theta = acos(2.0 * gsl_rng_uniform(rng) - 1.0); 
 	phi = 2.0 * FB_CONST_PI * gsl_rng_uniform(rng);	
 	omega = 2.0 * FB_CONST_PI * gsl_rng_uniform(rng);
 	obj->mean_anom = 2.0 * FB_CONST_PI * gsl_rng_uniform(rng); 
