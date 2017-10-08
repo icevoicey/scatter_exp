@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
 
 		/* set the initial condition of black hole binary */		
 		q = hier.hier[hier.hi[2]+0].obj[1]->m / hier.hier[hier.hi[2]+0].obj[0]->m; // 0<q<1, m1<m0
-		v_omega = sqrt((hier.hier[hier.hi[2]+0].obj[0]->m + hier.hier[hier.hi[2]+0].obj[1]->m) / pow(a0, 3.0)) //angle velocity of black hole binary
+		v_omega = sqrt((hier.hier[hier.hi[2]+0].obj[0]->m + hier.hier[hier.hi[2]+0].obj[1]->m) / pow(a0, 3.0)); //angle velocity of black hole binary
 		
 		
 		hier.hier[hier.hi[2]+0].obj[0]->x[0] = 0.0;
