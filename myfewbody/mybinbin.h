@@ -33,7 +33,6 @@
 #define FB_E0 0.0
 
 #define FB_DT 1.0 /* approximate output dt */
-#define FB_TSTOP 4.7e8 /* in units of t_dyn */
 #define FB_TCPUSTOP 1200.0 /* in seconds */
 
 #define FB_ABSACC 1.0e-9 /* absolute accuracy of integrator */
@@ -41,18 +40,18 @@
 #define FB_NCOUNT 1 /* number of timesteps between calls to classify() */
 
 #define FB_KS 0
-
 #define FB_FEXP 3.0 /* expansion factor of merger product */
-
-#define FB_SEED 1
 #define FB_DEBUG 0
 
-#define FB_A34MIN (0.01 * FB_CONST_AU)
-#define FB_A34MAX (1.2 * FB_CONST_AU)
-#define FB_E34MIN 0.0
-#define FB_E34MAX 0.0
-#define FB_PINDEX 5000000 /* total times we need */
-#define FB_PCOUNT 0 /* count the process times */
+#define FB_A1MIN (0.01 * FB_CONST_AU)
+#define FB_A1MAX (1.2 * FB_CONST_AU)
+#define FB_E1MIN 0.0
+#define FB_E1MAX 0.0
+
+#define FB_SEED 1
+#define FB_BMIN 1.00
+#define FB_BMAX 1.00 /* impact parameter in unit of pc */
+#define FB_PINDEX 5 /* total times we need */
 
 void print_usage(FILE *stream);
 int calc_units(fb_obj_t *obj[2], fb_units_t *units);

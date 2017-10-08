@@ -20,10 +20,10 @@ pc=(1*u.pc).to(u.m).value
 AU=(1*u.AU).to(u.m).value
 Rsun=(1*u.Rsun).to(u.m).value
 
-m0=1e7*Msun
-m1=1e7*Msun
+m0=1e2*Msun
+m1=1e2*Msun
 m2=1*Msun
-m3=1*Msun
+m3=1e-6*Msun
 
 def sigmaf(m): #velocity dispersion from M-sigma relation in Tremaine(2002)
     return (m/(10**8.13*Msun))**(1/4.02)*2e5
@@ -40,16 +40,14 @@ def r_bf(ma,mb): #bound radius of BHB, ma is the main BH
 
 
 a01=r_bf(m0,m1)
-a23=1.2*AU
+a23=1.0*AU
 e01=0
 e23=0
 
 vinf1=sigmaf(m0)
 vinf2=sigmaf(m0)/2**0.5
 bmax=1*r_influf(m0)
-#
-##fac=(2/1e6)**(1/3)*175
-#
+
 def v_unitf(m0=m0,m1=m1,m2=m2,m3=m3,a01=a01,a23=a23):
     m01=m0+m1
     m23=m2+m3
@@ -62,7 +60,7 @@ def l_unitf(a1=a01,a2=a23):
 def t_unitf(l_unit=l_unitf(),v_unit=v_unitf()):
     return l_unit/v_unit
 
-def t_tidf(tidal_tol=1e-5,m0=m0,m1=m1,m2=m2,m3=m3,a01=a01,a23=a23,e01=e01,e23=e23):
+def r_tidf(tidal_tol=1e-5,m0=m0,m1=m1,m2=m2,m3=m3,a01=a01,a23=a23,e01=e01,e23=e23):
     m01=m0+m1
     m23=m2+m3
     q01=m01**(-1/3)*a01*(1+e01)
@@ -78,19 +76,20 @@ def calt(r,a):
     t=0.1*G**(-0.5)*M**(0.5)/(r**0.5*rou*a*np.log((M/Msun)*(a/r)))
     return t/(1.3e10*year)
 
-def a_orbitf(vinf,M=m0+m1):
+def a_orbitf(vinf,M): #semi major axis of conic orbit
     return -G*M/vinf**2
 
-def e_orbitf(b,vinf,M=m0+m1):
+def e_orbitf(b,vinf,M): #ecentricity of conic orbit
     return (1+(b**2*vinf**4/(G*M)**2))**0.5
 
-def r_pf(b,vinf):
-    a=a_orbitf(vinf)
-    e=e_orbitf(b,vinf)
+def r_pf(b,vinf,M):  #pericenter distance of conic orbit
+    a=a_orbitf(vinf,M)
+    e=e_orbitf(b,vinf,M)
     return a*(1-e) 
 
-
-           
+def T_bf(a,m1,m2): #period of binary system
+    return 2*np.pi*(a**3/(G*(m1+m2)))**0.5    
+       
 v_unit=v_unitf()
 l_unit=l_unitf()
 t_unit=t_unitf()

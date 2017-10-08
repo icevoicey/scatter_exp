@@ -48,16 +48,13 @@ int calc_units(fb_obj_t *obj[2], fb_units_t *units)
 /* the main attraction */
 int main(int argc, char *argv[])
 {
-	int pindex = FB_PINDEX, pcount;
-	int j;
-	int seed;
-	double r00, r01, r10, r11, a0, a1, e0, e1;
-	double rtid, vinf, b, m0, m1, M, mu, Lint[3], Li[3], t;
-	double sigma, r_inf, bmax,fac;
-	double x[3], x0[3], x1[3], x2[3], x3[3], v0[3], v1[3], v2[3], v3[3], v[3], q, vtid;
+	int pindex = FB_PINDEX, pcount, j, seed, myv;
+	double a0, a1, e0, e1;
+	double rtid, vtid, vinf, b, m0, m1, M, mu, Lint[3], Li[3], t;
+	double sigma, r_inf, q, v_omega;
+	double x[3], x0[3], x1[3], x2[3], x3[3], v[3], v0[3], v1[3], v2[3], v3[3];
 	double a_ini, e_ini, rperi, my_r;
 	double my_i, my_psi, my_theta, my_alpha, my_phi, my_phi0, my_delta;
-	//double myx0,myy0,myz0,myx1,myy1,myz1,myvx0,myvy0,myvz0,myvx1,myvy1,myvz1;
 	fb_hier_t hier;
 	fb_input_t input;
 	fb_ret_t retval;
@@ -65,7 +62,7 @@ int main(int argc, char *argv[])
 	char string1[FB_MAX_STRING_LENGTH], string2[FB_MAX_STRING_LENGTH];
 	gsl_rng *rng;
 	const gsl_rng_type *rng_type=gsl_rng_mt19937;
-
+	double t_hubble = 1.3e10*365*24*60*60; // hubble time of the universe set as 13 billion years
 
 	/* initialize GSL rng */
 	gsl_rng_env_setup();
@@ -85,30 +82,13 @@ int main(int argc, char *argv[])
 	/* start the loop */
 	for (pcount=0; pcount < pindex; pcount++){
 
-		r00 = FB_R00;
-		r01 = FB_R01;
-		r10 = FB_R10;
-		r11 = FB_R11;
-
-		sigma = 2.0e7 * pow((FB_M00 / (pow(10, 8.13) * FB_CONST_MSUN)), 1.0/4.02); // velocity dispersion of star 
-		r_inf = FB_CONST_G * (FB_M00) / pow(sigma, 2); // influence radius of black hole
+		sigma = 2.0e7 * pow((FB_M00 / (pow(10.0, 8.13) * FB_CONST_MSUN)), 1.0/4.02); // velocity dispersion of star 
+		r_inf = FB_CONST_G * (FB_M00) / pow(sigma, 2.0); // influence radius of black hole
 
 		a0 = 2.0 * r_inf; 
-		a1 = exp((log(FB_A34MAX) - log(FB_A34MIN)) * gsl_rng_uniform(rng) + log(FB_A34MIN));
+		a1 = exp((log(FB_A1MAX) - log(FB_A1MIN)) * gsl_rng_uniform(rng) + log(FB_A1MIN));
 		e0 = FB_E0;
-		e1 = pow(((pow(FB_E34MAX, 2) - pow(FB_E34MIN, 2)) * gsl_rng_uniform(rng) + pow(FB_E34MIN, 2)), 0.5);	
-
-		input.ks = FB_KS;
-		input.tstop = FB_TSTOP;
-		input.Dflag = 0;
-		input.dt = FB_DT;
-		input.tcpustop = FB_TCPUSTOP;
-		input.absacc = FB_ABSACC;
-		input.relacc = FB_RELACC;
-		input.ncount = FB_NCOUNT;
-		input.tidaltol = FB_TIDALTOL;
-		input.fexp = FB_FEXP;
-		fb_debug = FB_DEBUG;
+		e1 = pow(((pow(FB_E1MAX, 2.0) - pow(FB_E1MIN, 2.0)) * gsl_rng_uniform(rng) + pow(FB_E1MIN, 2.0)), 0.5);		
 
 		/* initialize a few things for integrator */
 		t = 0.0;
@@ -139,10 +119,10 @@ int main(int argc, char *argv[])
 			hier.hier[hier.hi[1]+j].Lint[2] = 0.0;
 		}
 
-		hier.hier[hier.hi[1]+0].R = r00;
-		hier.hier[hier.hi[1]+1].R = r01;
-		hier.hier[hier.hi[1]+2].R = r10;
-		hier.hier[hier.hi[1]+3].R = r11;
+		hier.hier[hier.hi[1]+0].R = FB_R00;
+		hier.hier[hier.hi[1]+1].R = FB_R01;
+		hier.hier[hier.hi[1]+2].R = FB_R10;
+		hier.hier[hier.hi[1]+3].R = FB_R11;
 
 		hier.hier[hier.hi[1]+0].m = FB_M00;
 		hier.hier[hier.hi[1]+1].m = FB_M01;
@@ -154,7 +134,6 @@ int main(int argc, char *argv[])
 
 		hier.hier[hier.hi[2]+0].a = a0;
 		hier.hier[hier.hi[2]+1].a = a1;
-
 		hier.hier[hier.hi[2]+0].e = e0;
 		hier.hier[hier.hi[2]+1].e = e1;
 
@@ -167,14 +146,23 @@ int main(int argc, char *argv[])
 		calc_units(hier.obj, &units);
 		fb_normalize(&hier, units);
 
-		vinf = pow(FB_M00 / (pow(10, 8.13) * FB_CONST_MSUN), 1.0/4.02) * 2.0e7 / (pow(2.0, 0.5) * units.v); // center of mass of stellar binary velocity at infinite 
-		fac=1.0; // max impact parameter in unit of pc		
-		bmax = fac * FB_CONST_PARSEC / units.l;
-		b = pow((pow(bmax, 2) * gsl_rng_uniform(rng)), 0.5);
+		/* set the parameter for intergration */
+		input.ks = FB_KS;
+		input.tstop = t_hubble / units.t;
+		input.Dflag = 0;
+		input.dt = FB_DT;
+		input.tcpustop = FB_TCPUSTOP;
+		input.absacc = FB_ABSACC;
+		input.relacc = FB_RELACC;
+		input.ncount = FB_NCOUNT;
+		input.tidaltol = FB_TIDALTOL;
+		input.fexp = FB_FEXP;
+		fb_debug = FB_DEBUG;
 
-		/*	
-		b = bmax;				
-		*/
+
+		vinf = sigma / (pow(2.0, 0.5) * units.v); // center of mass of stellar binary velocity at infinite, which is the velocity dispersion divided by square root of 2 		
+		b = pow((((pow(FB_BMAX, 2) - pow(FB_BMIN, 2)) * gsl_rng_uniform(rng)) + pow(FB_BMIN, 2.0)), 0.5) * FB_CONST_PARSEC / units.l;
+		//b = FB_BMAX * FB_CONST_PARSEC / units.l;
 
 		/* move hierarchies analytically in from infinity along hyperbolic orbit */
 		m0 = hier.obj[0]->m;
@@ -188,7 +176,7 @@ int main(int argc, char *argv[])
 		e0 = hier.obj[0]->e;
 		e1 = hier.obj[1]->e;
 
-		rtid = pow(2.0*(m0+m1)/input.tidaltol, 1.0/3.0) * FB_MAX(pow(m0, -1.0/3.0)*a0*(1.0+e0), pow(m1, -1.0/3.0) * a1 * (1.0+e1));
+		rtid = pow(2.0*(m0+m1)/input.tidaltol, 1.0/3.0) * FB_MAX(pow(m0, -1.0/3.0) * a0 * (1.0 + e0), pow(m1, -1.0/3.0) * a1 * (1.0 + e1));
 		rperi = (vinf==0.0?0.0:(M/fb_sqr(vinf)*(sqrt(1.0+fb_sqr(b*fb_sqr(vinf)/M))-1.0)));
 
 		/* make sure r>=rperi, otherwise analytically moving the obj's below will give NANs */
@@ -202,7 +190,7 @@ int main(int argc, char *argv[])
 		my_phi = 2.0 * FB_CONST_PI * gsl_rng_uniform(rng); // two angle position in the sphereical coordinate system setting the initial point of stellar binary on a sphereical surface at infinite 
 		my_psi = 2.0 * FB_CONST_PI * gsl_rng_uniform(rng);
 		my_delta = FB_CONST_PI - my_i - my_phi0;
-		my_theta=acos(-1.0 / e_ini + a_ini * (1.0-fb_sqr(e_ini)) / (e_ini * my_r));
+		my_theta = acos(-1.0 / e_ini + a_ini * (1.0-fb_sqr(e_ini)) / (e_ini * my_r));
 
 		/* position coordinate at my_r(rtid) in the orbit framework */
 		x0[0] = 0.0;
@@ -215,13 +203,12 @@ int main(int argc, char *argv[])
 		fb_rotat(x2,x3,0,my_i);
 		fb_rotat(x3,x,2,-my_phi);
 
-		vtid=sqrt(fb_sqr(vinf) + 2.0 * mu / my_r); // velocity at my_r(rtid)
-		my_alpha=atan(x0[1]/(fb_sqr(e_ini)-1.0)*(x0[2]-e_ini*a_ini)); 
-
 		/* velocity coordinate at my_r(rtid) in the orbit framework */
-		v0[0]=0.0;
-		v0[1]=-vtid*cos(my_alpha);
-		v0[2]=-vtid*sin(my_alpha);
+		vtid = sqrt(fb_sqr(vinf) + 2.0 * mu / my_r);
+		my_alpha = atan(x0[1] / (fb_sqr(e_ini) - 1.0) * (x0[2] - e_ini * a_ini)); 
+		v0[0] = 0.0;
+		v0[1] = -vtid * cos(my_alpha);
+		v0[2] = -vtid * sin(my_alpha);
 
 		/* coordinate transform from the orbit framework to the black hole binary framework */
 		fb_rotat(v0,v1,0,-my_delta-my_i);
@@ -253,26 +240,30 @@ int main(int argc, char *argv[])
 		fb_upsync(&(hier.hier[hier.hi[2]+1]), t);
 
 		/* set the initial condition of black hole binary */		
-		q=hier.hier[hier.hi[2]+0].obj[1]->m / hier.hier[hier.hi[2]+0].obj[0]->m; // 0<q<1	
-		hier.hier[hier.hi[2]+0].obj[0]->x[0] = 0;
-		hier.hier[hier.hi[2]+0].obj[0]->x[1] = a0/(1.0+1.0/q);
-		hier.hier[hier.hi[2]+0].obj[0]->x[2] = 0;
+		q = hier.hier[hier.hi[2]+0].obj[1]->m / hier.hier[hier.hi[2]+0].obj[0]->m; // 0<q<1, m1<m0
+		v_omega = sqrt((hier.hier[hier.hi[2]+0].obj[0]->m + hier.hier[hier.hi[2]+0].obj[1]->m) / pow(a0, 3.0)) //angle velocity of black hole binary
+		
+		
+		hier.hier[hier.hi[2]+0].obj[0]->x[0] = 0.0;
+		hier.hier[hier.hi[2]+0].obj[0]->x[1] = a0 / (1.0 + 1.0 / q);
+		hier.hier[hier.hi[2]+0].obj[0]->x[2] = 0.0;
 
-		hier.hier[hier.hi[2]+0].obj[0]->v[0] = sqrt(hier.hier[hier.hi[2]+0].obj[1]->m/(1.0+1.0/q));
-		hier.hier[hier.hi[2]+0].obj[0]->v[1] = 0;
-		hier.hier[hier.hi[2]+0].obj[0]->v[2] = 0;
+		hier.hier[hier.hi[2]+0].obj[0]->v[0] = v_omega * a0 / (1.0 + 1.0 / q);
+		hier.hier[hier.hi[2]+0].obj[0]->v[1] = 0.0;
+		hier.hier[hier.hi[2]+0].obj[0]->v[2] = 0.0;
 
-		hier.hier[hier.hi[2]+0].obj[1]->x[0] = 0;
-		hier.hier[hier.hi[2]+0].obj[1]->x[1] = -a0/(1.0+q);
-		hier.hier[hier.hi[2]+0].obj[1]->x[2] = 0;
+		hier.hier[hier.hi[2]+0].obj[1]->x[0] = 0.0;
+		hier.hier[hier.hi[2]+0].obj[1]->x[1] = -a0 / (1.0 + q);
+		hier.hier[hier.hi[2]+0].obj[1]->x[2] = 0.0;
 
-		hier.hier[hier.hi[2]+0].obj[1]->v[0] = -sqrt(hier.hier[hier.hi[2]+0].obj[0]->m/(1.0+q));
-		hier.hier[hier.hi[2]+0].obj[1]->v[1] = 0;
-		hier.hier[hier.hi[2]+0].obj[1]->v[2] = 0;		
+		hier.hier[hier.hi[2]+0].obj[1]->v[0] = -v_omega * a0 / (1.0 + q);
+		hier.hier[hier.hi[2]+0].obj[1]->v[1] = 0.0;
+		hier.hier[hier.hi[2]+0].obj[1]->v[2] = 0.0;		
 
 		/* store the initial energy and angular momentum*/
 		fb_angmom(&(hier.hier[hier.hi[1]]), hier.nstar, Li);
 		fb_angmomint(&(hier.hier[hier.hi[1]]), hier.nstar, Lint);
+
 
 		/* call fewbody! */
 		retval = fewbody(input, &hier, &t);
@@ -304,7 +295,7 @@ int main(int argc, char *argv[])
 		/* free our own stuff */
 		fb_free_hier(hier);
 
-		printf("%d\n ", pcount);
+		printf("%.6g\n ", v_omega*units.v/units.l);
 	}
 
 	/* save important values of paramaters at the end of result file */
@@ -313,9 +304,9 @@ int main(int argc, char *argv[])
 	fprintf(fend, "PARAMETERS:\n");
 	fprintf(fend,  "m00=%.6g MSUN  m01=%.6g MSUN  m10=%.6g MSUN  m11=%.6g MSUN \n", FB_M00/FB_CONST_MSUN, FB_M01/FB_CONST_MSUN, FB_M10/FB_CONST_MSUN, FB_M11/FB_CONST_MSUN);
 	fprintf(fend, "a0=%.6g AU  e0=%.3g\n", a0*units.l/FB_CONST_PARSEC, e0);
-	fprintf(fend, "a1min=%.6g AU  a1max=%.6g AU   e1min=%.6g  e1max=%.6g\n", FB_A34MIN/FB_CONST_AU, FB_A34MAX/FB_CONST_AU, FB_E34MIN, FB_E34MAX);
-	fprintf(fend, "vinf=%.6g m/s  bmax=%.6g pc  tstop=%.6g  tcpustop=%.6g\n", vinf*units.v/100.0, bmax*units.l/FB_CONST_PARSEC, FB_TSTOP, FB_TCPUSTOP);
-	fprintf(fend, "tidaltol=%.6g  abs_acc=%.6g  rel_acc=%.6g  ncount=%d  fexp=%.6g  seed=%d  pindex=%d\n", FB_TIDALTOL, FB_ABSACC, FB_RELACC, FB_NCOUNT, FB_FEXP, FB_SEED, FB_PINDEX);
+	fprintf(fend, "a1min=%.6g AU  a1max=%.6g AU   e1min=%.6g  e1max=%.6g\n", FB_A1MIN/FB_CONST_AU, FB_A1MAX/FB_CONST_AU, FB_E1MIN, FB_E1MAX);
+	fprintf(fend, "vinf=%.6g m/s  bmax=%.6g pc  bmin=%.6g pc\n", vinf*units.v/100.0, FB_BMAX, FB_BMIN);
+	fprintf(fend, "tidaltol=%.6g  abs_acc=%.6g  rel_acc=%.6g  ncount=%d  fexp=%.6g  seed=%d  num=%d\n", FB_TIDALTOL, FB_ABSACC, FB_RELACC, FB_NCOUNT, FB_FEXP, FB_SEED, FB_PINDEX);
 	fclose(fend);
 
 	/* free GSL stuff */

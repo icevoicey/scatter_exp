@@ -239,38 +239,6 @@ fb_ret_t fewbody(fb_input_t input, fb_hier_t *hier, double *t)
 				}
 			}
 
-
-			/* update Ebound */
-/*
-			if (1){
-				double x01[3], v01[3], r01_2[3], r01_3[3], v01_2[3], v01_3[3], xc[3], vc[3];
-				for (k=0; k<3; k++){
-					x01[k] = (hier->hier[hier->hi[1]+0].x[k] + q01 * hier->hier[hier->hi[1]+1].x[k]) / (1 + q01);
-					v01[k] = (hier->hier[hier->hi[1]+0].v[k] + q01 * hier->hier[hier->hi[1]+1].v[k]) / (1 + q01);
-					r01_2[k] = hier->hier[hier->hi[1]+2].x[k] - x01[k];
-					r01_3[k] = hier->hier[hier->hi[1]+3].x[k] - x01[k];
-					v01_2[k] = hier->hier[hier->hi[1]+2].v[k] - v01[k];
-					v01_3[k] = hier->hier[hier->hi[1]+3].v[k] - v01[k];
-					xc[k] = (hier->hier[hier->hi[1]+0].x[k] + q01 * hier->hier[hier->hi[1]+1].x[k] + q02 * (hier->hier[hier->hi[1]+2].x[k] + hier->hier[hier->hi[1]+3].x[k]))/(1 + q01 + 2 * q02);
-					vc[k] = (hier->hier[hier->hi[1]+0].v[k] + q01 * hier->hier[hier->hi[1]+1].v[k] + q02 * (hier->hier[hier->hi[1]+2].v[k] + hier->hier[hier->hi[1]+3].v[k]))/(1 + q01 + 2 * q02);
-				}
-				if (Rmax_start == 1 && fb_mod(r01_2) > fb_mod(retval.Rmax01_2)){
-					for (k=0; k<3; k++){
-						retval.Rmax01_2[k] = r01_2[k];
-						retval.Vmax01_2[k] = v01_2[k];
-					}
-				}
-				if (Rmax_start == 1 && fb_mod(r01_3) > fb_mod(retval.Rmax01_3)){
-					for (k=0; k<3; k++){	
-						retval.Rmax01_3[k] = r01_3[k];
-						retval.Vmax01_3[k] = v01_3[k];
-					}
-				}
-
-			printf("%.6g %.6g\n",fb_mod(xc),fb_mod(vc));
-
-			}
-*/
 			/* update Ebound */
 			if (1){
 				for (k=0; k<3; k++){
