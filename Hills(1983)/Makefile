@@ -65,7 +65,7 @@ FEWBODY_OBJS = fewbody.o fewbody_classify.o fewbody_coll.o fewbody_hier.o \
 	fewbody_int.o fewbody_io.o fewbody_isolate.o fewbody_ks.o \
 	fewbody_nonks.o fewbody_scat.o fewbody_utils.o fewbody_ui.o 
 
-all: mybinbin 
+all: mybinsingle 
 
 cluster: cluster.o $(FEWBODY_OBJS)
 	$(CC) $(CFLAGS) $^ -o $@ $(LIBFLAGS)
@@ -76,7 +76,7 @@ triplebin: triplebin.o $(FEWBODY_OBJS)
 binbin: binbin.o $(FEWBODY_OBJS)
 	$(CC) $(CFLAGS) $^ -o $@ $(LIBFLAGS)
 
-binsingle: binsingle.o $(FEWBODY_OBJS)
+mybinsingle: mybinsingle.o $(FEWBODY_OBJS)
 	$(CC) $(CFLAGS) $^ -o $@ $(LIBFLAGS)
 
 binsingle_simple: binsingle_simple.o $(FEWBODY_OBJS)
@@ -100,7 +100,7 @@ triplebin.o: triplebin.c triplebin.h fewbody.h Makefile
 binbin.o: binbin.c binbin.h fewbody.h Makefile
 	$(CC) $(CFLAGS) -c $< -o $@
 
-binsingle.o: binsingle.c binsingle.h fewbody.h Makefile
+mybinsingle.o: mybinsingle.c mybinsingle.h fewbody.h Makefile
 	$(CC) $(CFLAGS) -c $< -o $@
 
 mybinbin.o: mybinbin.c mybinbin.h fewbody.h Makefile
@@ -132,7 +132,7 @@ clean:
 	rm -f $(FEWBODY_OBJS) cluster.o triplebin.o binbin.o binsingle.o \
 	sigma_binsingle.o cluster triplebin binbin binsingle sigma_binsingle \
 	triple binsingle_simple.o binsingle_simple mybinbin mybinbin.o \
-	triple.o
+	triple.o mybinsingle mybinsingle.o result*
 
 mrproper: clean
 	rm -f *~ *.bak *.dat ChangeLog

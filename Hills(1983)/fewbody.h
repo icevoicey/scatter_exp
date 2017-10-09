@@ -145,11 +145,10 @@ typedef struct{
 	double x0[3];
 	double x1[3];
 	double x2[3];
-	double x3[3];
 	double v0[3];
 	double v1[3];
 	double v2[3];
-	double v3[3];
+
 } fb_ret_t;
 
 /* fewbody.c */

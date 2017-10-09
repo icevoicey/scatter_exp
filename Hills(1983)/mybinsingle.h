@@ -1,5 +1,5 @@
 /* -*- linux-c -*- */
-/* binbin.h
+/* binsingle.h
 
    Copyright (C) 2002-2004 John M. Fregeau
    
@@ -22,36 +22,30 @@
 
 #define FB_M00 (1.0e2 * FB_CONST_MSUN)
 #define FB_M01 (1.0e2 * FB_CONST_MSUN)
-#define FB_M10 (1.0 * FB_CONST_MSUN)
-#define FB_M11 (1.0e-6 * FB_CONST_MSUN)
+#define FB_M1 (1.0 * FB_CONST_MSUN)
 
 #define FB_R00 (0.0 * FB_CONST_RSUN)
 #define FB_R01 (0.0 * FB_CONST_RSUN)
-#define FB_R10 (0.0 * FB_CONST_RSUN)
-#define FB_R11 (0.0 * FB_CONST_RSUN)
+#define FB_R1 (0.0 * FB_CONST_RSUN)
 
 #define FB_E0 0.0
 
 #define FB_DT 1.0 /* approximate output dt */
-#define FB_TCPUSTOP 1200.0 /* in seconds */
+#define FB_TCPUSTOP 3600.0 /* in seconds */
 
-#define FB_ABSACC 1.0e-9 /* absolute accuracy of integrator */
-#define FB_RELACC 1.0e-9 /* relative accuracy of integrator */
+#define FB_ABSACC 1.0e-6 /* absolute accuracy of integrator */
+#define FB_RELACC 1.0e-6 /* relative accuracy of integrator */
 #define FB_NCOUNT 1 /* number of timesteps between calls to classify() */
 
 #define FB_KS 0
 #define FB_FEXP 3.0 /* expansion factor of merger product */
 #define FB_DEBUG 0
 
-#define FB_A1MIN (1.0 * FB_CONST_AU)
-#define FB_A1MAX (1.0 * FB_CONST_AU)
-#define FB_E1MIN 0.0
-#define FB_E1MAX 0.0
-
 #define FB_SEED 1
-#define FB_BMIN 1.00
-#define FB_BMAX 1.00 /* impact parameter in unit of pc */
-#define FB_PINDEX 5 /* total times we need */
+#define FB_BMIN 1.5
+#define FB_BMAX 1.5 /* impact parameter in unit of pc */
+#define FB_PINDEX 50 /* total times we need */
 
+ 
 void print_usage(FILE *stream);
 int calc_units(fb_obj_t *obj[2], fb_units_t *units);
