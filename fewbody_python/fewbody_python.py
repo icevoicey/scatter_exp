@@ -23,7 +23,7 @@ Rsun=(1*u.Rsun).to(u.m).value
 m0=1e2*Msun
 m1=1e2*Msun
 m2=1*Msun
-m3=1e-6*Msun
+m3=0*Msun
 
 def sigmaf(m): #velocity dispersion from M-sigma relation in Tremaine(2002)
     return (m/(10**8.13*Msun))**(1/4.02)*2e5
@@ -40,48 +40,49 @@ def r_bf(ma,mb): #bound radius of BHB, ma is the main BH
 
 
 a01=r_bf(m0,m1)
-a23=1.0*AU
+a23=0
 e01=0
 e23=0
 
+v_c=(G*(m0+m1)/a01)**0.5
 vinf1=sigmaf(m0)
 vinf2=sigmaf(m0)/2**0.5
+vinf3=0.1*v_c
 bmax=1*r_influf(m0)
 
 def v_unitf(m0=m0,m1=m1,m2=m2,m3=m3,a01=a01,a23=a23):
     m01=m0+m1
     m23=m2+m3
     mu=m01*m23/(m01+m23)
-    return (G/mu*(m0*m1/a01+m2*m3/a23))**0.5
-
-def l_unitf(a1=a01,a2=a23):
-    return a1+a2
-
-def t_unitf(l_unit=l_unitf(),v_unit=v_unitf()):
-    return l_unit/v_unit
+    return (G/mu*(m0*m1/a01))**0.5
+#
+#def l_unitf(a1=a01,a2=a23):
+#    return a1+a2
+#
+#def t_unitf(l_unit=l_unitf(),v_unit=v_unitf()):
+#    return l_unit/v_unit
 
 def r_tidf(tidal_tol=1e-5,m0=m0,m1=m1,m2=m2,m3=m3,a01=a01,a23=a23,e01=e01,e23=e23):
     m01=m0+m1
     m23=m2+m3
-    q01=m01**(-1/3)*a01*(1+e01)
-    q23=m23**(-1/3)*a23*(1+e23)
-    q=max(q01,q23)
-    return (2*(m01+m23)/tidal_tol)**(1/3)*q
+    r01=(2*(m01+m23)*m23/(m01*m23*tidal_tol))**(1/3)*a01*(1+e01)
+    r23=(2*(m01+m23)*m01/(m01*m23*tidal_tol))**(1/3)*a23*(1+e23)
+    return max(r01,r23)
 
-def calt(r,a):
-    M=1e7*Msun
-    r_b=1.9e3*pc
-    A=3.6e6*Msun/(0.16**(-1.8)*np.exp(-(0.16/1900)**2)*pc**1.2)
-    rou=A*r**(-1.8)*np.exp(-(r/r_b)**2)
-    t=0.1*G**(-0.5)*M**(0.5)/(r**0.5*rou*a*np.log((M/Msun)*(a/r)))
-    return t/(1.3e10*year)
-
+#def calt(r,a):
+#    M=1e7*Msun
+#    r_b=1.9e3*pc
+#    A=3.6e6*Msun/(0.16**(-1.8)*np.exp(-(0.16/1900)**2)*pc**1.2)
+#    rou=A*r**(-1.8)*np.exp(-(r/r_b)**2)
+#    t=0.1*G**(-0.5)*M**(0.5)/(r**0.5*rou*a*np.log((M/Msun)*(a/r)))
+#    return t/(1.3e10*year)
+#
 def a_orbitf(vinf,M): #semi major axis of conic orbit
     return -G*M/vinf**2
 
 def e_orbitf(b,vinf,M): #ecentricity of conic orbit
     return (1+(b**2*vinf**4/(G*M)**2))**0.5
-
+#
 def r_pf(b,vinf,M):  #pericenter distance of conic orbit
     a=a_orbitf(vinf,M)
     e=e_orbitf(b,vinf,M)
@@ -89,13 +90,21 @@ def r_pf(b,vinf,M):  #pericenter distance of conic orbit
 
 def T_bf(a,m1,m2): #period of binary system
     return 2*np.pi*(a**3/(G*(m1+m2)))**0.5    
-       
-v_unit=v_unitf()
-l_unit=l_unitf()
-t_unit=t_unitf()
-m_unit=l_unit*v_unit**2/G
-e_unit=v_unit**2*m_unit
 
-t_stop=130e8*year/t_unit #hubble time as stoptime in unit of t_unit
+v_omega=2*np.pi/T_bf(a01,m0,m1)
+v0=v_omega*a01/(1+1)
+v1=v_omega*a01/(1+1)  
 
+E=0.5*m0*v0**2+0.5*m1*v1**2
+Ep=G*m0*m1/a01 
+#v_unit=v_unitf()
+#l_unit=l_unitf()
+#t_unit=t_unitf()
+#m_unit=l_unit*v_unit**2/G
+#e_unit=v_unit**2*m_unit
+#
+#t_stop=130e8*year/t_unit #hubble time as stoptime in unit of t_unit
+#
+#def rp(b,alpha=0.1):
+#    return ((1+b**2*alpha**4)**0.5-1)/alpha**2
 
