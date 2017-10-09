@@ -49,8 +49,8 @@ int calc_units(fb_obj_t *obj[2], fb_units_t *units)
 int main(int argc, char *argv[])
 {
 	int pindex = FB_PINDEX, pcount, j, seed;
-	double a0, a1, e0, e1;
-	double rtid, vtid, vinf, b, m0, m1, M, mu, Lint[3], Li[3], t;
+	double a0, a1, e0, e1, mya1, mye1;
+	double rtid, vtid, vinf, b, m0, m1, M, t;
 	double sigma, r_inf, q, v_omega;
 	double x[3], x0[3], x1[3], x2[3], x3[3], v[3], v0[3], v1[3], v2[3], v3[3];
 	double a_ini, e_ini, rperi, my_r;
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 	char string1[FB_MAX_STRING_LENGTH], string2[FB_MAX_STRING_LENGTH];
 	gsl_rng *rng;
 	const gsl_rng_type *rng_type=gsl_rng_mt19937;
-	double t_hubble = 1.3e10*365*24*60*60; // hubble time of the universe set as 13 billion years
+	double t_hubble = 1.3e10 * FB_CONST_YR; // hubble time of the universe set as 13 billion years
 
 	/* initialize GSL rng */
 	gsl_rng_env_setup();
@@ -85,10 +85,8 @@ int main(int argc, char *argv[])
 		sigma = 2.0e7 * pow((FB_M00 / (pow(10.0, 8.13) * FB_CONST_MSUN)), 1.0/4.02); // velocity dispersion of star 
 		r_inf = FB_CONST_G * (FB_M00) / pow(sigma, 2.0); // influence radius of black hole
 
-		a0 = 2.0 * r_inf; 
-		a1 = exp((log(FB_A1MAX) - log(FB_A1MIN)) * gsl_rng_uniform(rng) + log(FB_A1MIN));
-		e0 = FB_E0;
-		e1 = pow(((pow(FB_E1MAX, 2.0) - pow(FB_E1MIN, 2.0)) * gsl_rng_uniform(rng) + pow(FB_E1MIN, 2.0)), 0.5);		
+		mya1 = exp((log(FB_A1MAX) - log(FB_A1MIN)) * gsl_rng_uniform(rng) + log(FB_A1MIN));
+		mye1 = pow(((pow(FB_E1MAX, 2.0) - pow(FB_E1MIN, 2.0)) * gsl_rng_uniform(rng) + pow(FB_E1MIN, 2.0)), 0.5);		
 
 		/* initialize a few things for integrator */
 		t = 0.0;
@@ -132,10 +130,10 @@ int main(int argc, char *argv[])
 		hier.hier[hier.hi[2]+0].m = FB_M00 + FB_M01;
 		hier.hier[hier.hi[2]+1].m = FB_M10 + FB_M11;
 
-		hier.hier[hier.hi[2]+0].a = a0;
-		hier.hier[hier.hi[2]+1].a = a1;
-		hier.hier[hier.hi[2]+0].e = e0;
-		hier.hier[hier.hi[2]+1].e = e1;
+		hier.hier[hier.hi[2]+0].a = 2.0 * r_inf;
+		hier.hier[hier.hi[2]+1].a = mya1;
+		hier.hier[hier.hi[2]+0].e = FB_E0;
+		hier.hier[hier.hi[2]+1].e = mye1;
 
 		hier.obj[0] = &(hier.hier[hier.hi[2]+0]);
 		hier.obj[1] = &(hier.hier[hier.hi[2]+1]);
@@ -159,16 +157,13 @@ int main(int argc, char *argv[])
 		input.fexp = FB_FEXP;
 		fb_debug = FB_DEBUG;
 
-
 		vinf = sigma / (pow(2.0, 0.5) * units.v); // center of mass of stellar binary velocity at infinite, which is the velocity dispersion divided by square root of 2 		
 		b = pow((((pow(FB_BMAX, 2) - pow(FB_BMIN, 2)) * gsl_rng_uniform(rng)) + pow(FB_BMIN, 2.0)), 0.5) * FB_CONST_PARSEC / units.l;
-		//b = FB_BMAX * FB_CONST_PARSEC / units.l;
 
 		/* move hierarchies analytically in from infinity along hyperbolic orbit */
 		m0 = hier.obj[0]->m;
 		m1 = hier.obj[1]->m;
 		M = m0 + m1;
-		mu = m0 * m1 / M;
 
 		a0 = hier.obj[0]->a;
 		a1 = hier.obj[1]->a;
@@ -182,8 +177,8 @@ int main(int argc, char *argv[])
 		/* make sure r>=rperi, otherwise analytically moving the obj's below will give NANs */
 		my_r = FB_MAX(rtid, rperi);
 
-		a_ini = -mu / fb_sqr(vinf);
-		e_ini = sqrt(1.0 + fb_sqr(b) * pow(vinf,4.0) / fb_sqr(mu)); // major semi-axis amd eccemtricity of the hyperbolic orbit moving from infinite to the start point of intergration (rtid)
+		a_ini = -M / fb_sqr(vinf);
+		e_ini = sqrt(1.0 + fb_sqr(b) * pow(vinf,4.0) / fb_sqr(M)); // major semi-axis amd eccemtricity of the hyperbolic orbit moving from infinite to the start point of intergration (rtid)
 		my_phi0 = acos(-1.0 / e_ini);
 
 		my_i = acos(1.0 * gsl_rng_uniform(rng));
@@ -204,7 +199,7 @@ int main(int argc, char *argv[])
 		fb_rotat(x3,x,2,-my_phi);
 
 		/* velocity coordinate at my_r(rtid) in the orbit framework */
-		vtid = sqrt(fb_sqr(vinf) + 2.0 * mu / my_r);
+		vtid = sqrt(fb_sqr(vinf) + 2.0 * M / my_r);
 		my_alpha = atan(x0[1] / (fb_sqr(e_ini) - 1.0) * (x0[2] - e_ini * a_ini)); 
 		v0[0] = 0.0;
 		v0[1] = -vtid * cos(my_alpha);
@@ -259,17 +254,6 @@ int main(int argc, char *argv[])
 		hier.hier[hier.hi[2]+0].obj[1]->v[1] = 0.0;
 		hier.hier[hier.hi[2]+0].obj[1]->v[2] = 0.0;		
 
-
-		/* trickle down the blakc hole binary properties, then back up */
-		//fb_downsync(&(hier.hier[hier.hi[2]+0]), t);
-		//fb_upsync(&(hier.hier[hier.hi[2]+0]), t);
-
-
-		/* store the initial energy and angular momentum*/
-		fb_angmom(&(hier.hier[hier.hi[1]]), hier.nstar, Li);
-		fb_angmomint(&(hier.hier[hier.hi[1]]), hier.nstar, Lint);
-
-
 		/* call fewbody! */
 		retval = fewbody(input, &hier, &t);
 
@@ -302,7 +286,7 @@ int main(int argc, char *argv[])
 		/* free our own stuff */
 		fb_free_hier(hier);
 
-		printf("%.6g\n ", v_omega*units.v/units.l);
+		printf("%d\n ", pcount);
 	}
 
 	/* save important values of paramaters at the end of result file */
@@ -310,10 +294,10 @@ int main(int argc, char *argv[])
 	fend = fopen(name, "a");
 	fprintf(fend, "PARAMETERS:\n");
 	fprintf(fend,  "m00=%.6g MSUN  m01=%.6g MSUN  m10=%.6g MSUN  m11=%.6g MSUN \n", FB_M00/FB_CONST_MSUN, FB_M01/FB_CONST_MSUN, FB_M10/FB_CONST_MSUN, FB_M11/FB_CONST_MSUN);
-	fprintf(fend, "a0=%.6g AU  e0=%.3g\n", a0*units.l/FB_CONST_PARSEC, e0);
+	fprintf(fend, "a0=%.6g pc  e0=%.3g\n", a0*units.l/FB_CONST_PARSEC, e0);
 	fprintf(fend, "a1min=%.6g AU  a1max=%.6g AU   e1min=%.6g  e1max=%.6g\n", FB_A1MIN/FB_CONST_AU, FB_A1MAX/FB_CONST_AU, FB_E1MIN, FB_E1MAX);
 	fprintf(fend, "vinf=%.6g km/s  bmin=%.6g pc  bmax=%.6g pc\n", vinf*units.v/1.0e5, FB_BMIN, FB_BMAX);
-	fprintf(fend, "tidaltol=%.6g  abs_acc=%.6g  rel_acc=%.6g  ncount=%d  fexp=%.6g  seed=%d  num=%d\n", FB_TIDALTOL, FB_ABSACC, FB_RELACC, FB_NCOUNT, FB_FEXP, FB_SEED, FB_PINDEX);
+	fprintf(fend, "tidaltol=%.6g  abs_acc=%.6g  rel_acc=%.6g  seed=%d  num=%d\n", FB_TIDALTOL, FB_ABSACC, FB_RELACC, FB_SEED, FB_PINDEX);
 	fclose(fend);
 
 	/* free GSL stuff */

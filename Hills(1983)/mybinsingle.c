@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 {
 	int pindex = FB_PINDEX, pcount, j, seed;
 	double a0, e0;
-	double rtid, vtid, vinf, b, m0, m1, M, mu, t;
+	double rtid, vtid, vinf, b, m0, m1, M, t;
 	double sigma, r_inf, q, v_omega,v_c;
 	double x[3], x0[3], x1[3], x2[3], x3[3], v[3], v0[3], v1[3], v2[3], v3[3];
 	double a_ini, e_ini, rperi, my_r;
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	char string1[FB_MAX_STRING_LENGTH], string2[FB_MAX_STRING_LENGTH];
 	gsl_rng *rng;
 	const gsl_rng_type *rng_type=gsl_rng_mt19937;
-	double t_hubble = 1.0e10 * 365 * 24 * 60 * 60; // hubble time of the universe set as 13 billion years
+	double t_hubble = 1.3e10 * 365 * 24 * 60 * 60; // hubble time of the universe set as 13 billion years
 
 	/* initialize GSL rng */
 	gsl_rng_env_setup();
@@ -83,7 +83,6 @@ int main(int argc, char *argv[])
 
 		sigma = 2.0e7 * pow((FB_M00 / (pow(10.0, 8.13) * FB_CONST_MSUN)), 1.0/4.02); // velocity dispersion of star 
 		r_inf = FB_CONST_G * (FB_M00) / pow(sigma, 2.0); // influence radius of black hole
-
 		v_c=sqrt(FB_CONST_G*(FB_M00+FB_M01)/(2.0 * r_inf));
 
 		/* initialize a few things for integrator */
@@ -119,7 +118,6 @@ int main(int argc, char *argv[])
 		hier.hier[hier.hi[1]+0].m = FB_M00;
 		hier.hier[hier.hi[1]+1].m = FB_M01;
 		hier.hier[hier.hi[1]+2].m = FB_M1;
-
 		hier.hier[hier.hi[2]+0].m = FB_M00 + FB_M01;
 
 		hier.hier[hier.hi[2]+0].a = 2.0 * r_inf;
@@ -152,7 +150,6 @@ int main(int argc, char *argv[])
 		m0 = hier.obj[0]->m;
 		m1 = hier.obj[1]->m;
 		M = m0 + m1;
-		mu = m0 * m1 / M;
 
 		a0 = hier.obj[0]->a;
 		e0 = hier.obj[0]->e;
@@ -160,87 +157,84 @@ int main(int argc, char *argv[])
 		vinf = 0.1 * v_c / units.v;
 
 		rtid = pow(2.0 * (m0 + m1) / (m0 * input.tidaltol), 1.0/3.0) * a0 * (1.0+e0);
-
 		rperi = (vinf==0.0?0.0:(M/fb_sqr(vinf)*(sqrt(1.0+fb_sqr(b*fb_sqr(vinf)/M))-1.0)));
 
-		//fb_init_scattering(hier.obj[0], hier.obj[1], vinf, b, rtid);
-		if(1){
-			/* make sure r>=rperi, otherwise analytically moving the obj's below will give NANs */
-			my_r = FB_MAX(rtid, rperi);
+		/* make sure r>=rperi, otherwise analytically moving the obj's below will give NANs */
+		my_r = FB_MAX(rtid, rperi);
 
-			a_ini = -M / fb_sqr(vinf);
-			e_ini = sqrt(1.0 + fb_sqr(b) * pow(vinf,4.0) / fb_sqr(M)); // major semi-axis amd eccemtricity of the hyperbolic orbit moving from infinite to the start point of intergration (rtid)
-			my_phi0 = acos(-1.0 / e_ini);
+		a_ini = -M / fb_sqr(vinf);
+		e_ini = sqrt(1.0 + fb_sqr(b) * pow(vinf,4.0) / fb_sqr(M)); // major semi-axis amd eccemtricity of the hyperbolic orbit moving from infinite to the start point of intergration (rtid)
+		my_phi0 = acos(-1.0 / e_ini);
 
-			my_i = acos(1.0 * gsl_rng_uniform(rng));
-			my_phi = 2.0 * FB_CONST_PI * gsl_rng_uniform(rng); // two angle position in the sphereical coordinate system setting the initial point of stellar binary on a sphereical surface at infinite 
-			my_psi = 2.0 * FB_CONST_PI * gsl_rng_uniform(rng);
-			my_delta = FB_CONST_PI - my_i - my_phi0;
-			my_theta = acos(-1.0 / e_ini + a_ini * (1.0-fb_sqr(e_ini)) / (e_ini * my_r));
+		my_i = acos(1.0 * gsl_rng_uniform(rng));
+		my_phi = 2.0 * FB_CONST_PI * gsl_rng_uniform(rng); // two angle position in the sphereical coordinate system setting the initial point of stellar binary on a sphereical surface at infinite 
+		my_psi = 2.0 * FB_CONST_PI * gsl_rng_uniform(rng);
+		my_delta = FB_CONST_PI - my_i - my_phi0;
+		my_theta = acos(-1.0 / e_ini + a_ini * (1.0-fb_sqr(e_ini)) / (e_ini * my_r));
 
-			/* position coordinate at my_r(rtid) in the orbit framework */
-			x0[0] = 0.0;
-			x0[1] = my_r * sin(my_theta);
-			x0[2] = -my_r * cos(my_theta);
+		/* position coordinate at my_r(rtid) in the orbit framework */
+		x0[0] = 0.0;
+		x0[1] = my_r * sin(my_theta);
+		x0[2] = -my_r * cos(my_theta);
 
-			/* coordinate transform from the orbit framework to the black hole binary framework */
-			fb_rotat(x0,x1,0,-my_delta-my_i);
-			fb_rotat(x1,x2,2,-my_psi);
-			fb_rotat(x2,x3,0,my_i);
-			fb_rotat(x3,x,2,-my_phi);
+		/* coordinate transform from the orbit framework to the black hole binary framework */
+		fb_rotat(x0,x1,0,-my_delta-my_i);
+		fb_rotat(x1,x2,2,-my_psi);
+		fb_rotat(x2,x3,0,my_i);
+		fb_rotat(x3,x,2,-my_phi);
 
-			/* velocity coordinate at my_r(rtid) in the orbit framework */
-			vtid = sqrt(fb_sqr(vinf) + 2.0 * mu / my_r);
-			my_alpha = atan(x0[1] / (fb_sqr(e_ini) - 1.0) * (x0[2] - e_ini * a_ini)); 
-			v0[0] = 0.0;
-			v0[1] = -vtid * cos(my_alpha);
-			v0[2] = -vtid * sin(my_alpha);
+		/* velocity coordinate at my_r(rtid) in the orbit framework */
+		vtid = sqrt(fb_sqr(vinf) + 2.0 * M / my_r);
+		my_alpha = atan(x0[1] / (fb_sqr(e_ini) - 1.0) * (x0[2] - e_ini * a_ini)); 
+		v0[0] = 0.0;
+		v0[1] = -vtid * cos(my_alpha);
+		v0[2] = -vtid * sin(my_alpha);
 
-			/* coordinate transform from the orbit framework to the black hole binary framework */
-			fb_rotat(v0,v1,0,-my_delta-my_i);
-			fb_rotat(v1,v2,2,-my_psi);
-			fb_rotat(v2,v3,0,my_i);
-			fb_rotat(v3,v,2,-my_phi);
+		/* coordinate transform from the orbit framework to the black hole binary framework */
+		fb_rotat(v0,v1,0,-my_delta-my_i);
+		fb_rotat(v1,v2,2,-my_psi);
+		fb_rotat(v2,v3,0,my_i);
+		fb_rotat(v3,v,2,-my_phi);
 
-			/* coordinate of center of mass of black hole binary */
-			hier.obj[0]->x[0] = 0.0;
-			hier.obj[0]->x[1] = 0.0;
-			hier.obj[0]->x[2] = 0.0;
+		/* coordinate of center of mass of black hole binary */
+		hier.obj[0]->x[0] = 0.0;
+		hier.obj[0]->x[1] = 0.0;
+		hier.obj[0]->x[2] = 0.0;
 
-			hier.obj[0]->v[0] = 0.0;
-			hier.obj[0]->v[1] = 0.0;
-			hier.obj[0]->v[2] = 0.0;
+		hier.obj[0]->v[0] = 0.0;
+		hier.obj[0]->v[1] = 0.0;
+		hier.obj[0]->v[2] = 0.0;
 
-			/* coordinate of center of mass of star */
-			hier.obj[1]->x[0] = x[0];
-			hier.obj[1]->x[1] = x[1];
-			hier.obj[1]->x[2] = x[2];
+		/* coordinate of center of mass of star */
+		hier.obj[1]->x[0] = x[0];
+		hier.obj[1]->x[1] = x[1];
+		hier.obj[1]->x[2] = x[2];
 
-			hier.obj[1]->v[0] = v[0];
-			hier.obj[1]->v[1] = v[1];
-			hier.obj[1]->v[2] = v[2];
+		hier.obj[1]->v[0] = v[0];
+		hier.obj[1]->v[1] = v[1];
+		hier.obj[1]->v[2] = v[2];
 
-			/* set the initial condition of black hole binary */		
-			q = hier.hier[hier.hi[2]+0].obj[1]->m / hier.hier[hier.hi[2]+0].obj[0]->m; // 0<q<1, m1<m0
-			v_omega = sqrt((hier.hier[hier.hi[2]+0].obj[0]->m + hier.hier[hier.hi[2]+0].obj[1]->m) / pow(a0, 3.0)); //angle velocity of black hole binary
-		
-			hier.hier[hier.hi[2]+0].obj[0]->x[0] = 0.0;
-			hier.hier[hier.hi[2]+0].obj[0]->x[1] = a0 / (1.0 + 1.0 / q);
-			hier.hier[hier.hi[2]+0].obj[0]->x[2] = 0.0;
+		/* set the initial condition of black hole binary */		
+		q = hier.hier[hier.hi[2]+0].obj[1]->m / hier.hier[hier.hi[2]+0].obj[0]->m; // 0<q<1, m1<m0
+		v_omega = sqrt((hier.hier[hier.hi[2]+0].obj[0]->m + hier.hier[hier.hi[2]+0].obj[1]->m) / pow(a0, 3.0)); //angle velocity of black hole binary
+	
+		hier.hier[hier.hi[2]+0].obj[0]->x[0] = 0.0;
+		hier.hier[hier.hi[2]+0].obj[0]->x[1] = a0 / (1.0 + 1.0 / q);
+		hier.hier[hier.hi[2]+0].obj[0]->x[2] = 0.0;
 
-			hier.hier[hier.hi[2]+0].obj[0]->v[0] = v_omega * a0 / (1.0 + 1.0 / q);
-			hier.hier[hier.hi[2]+0].obj[0]->v[1] = 0.0;
-			hier.hier[hier.hi[2]+0].obj[0]->v[2] = 0.0;
+		hier.hier[hier.hi[2]+0].obj[0]->v[0] = v_omega * a0 / (1.0 + 1.0 / q);
+		hier.hier[hier.hi[2]+0].obj[0]->v[1] = 0.0;
+		hier.hier[hier.hi[2]+0].obj[0]->v[2] = 0.0;
 
-			hier.hier[hier.hi[2]+0].obj[1]->x[0] = 0.0;
-			hier.hier[hier.hi[2]+0].obj[1]->x[1] = -a0 / (1.0 + q);
-			hier.hier[hier.hi[2]+0].obj[1]->x[2] = 0.0;
+		hier.hier[hier.hi[2]+0].obj[1]->x[0] = 0.0;
+		hier.hier[hier.hi[2]+0].obj[1]->x[1] = -a0 / (1.0 + q);
+		hier.hier[hier.hi[2]+0].obj[1]->x[2] = 0.0;
 
-			hier.hier[hier.hi[2]+0].obj[1]->v[0] = -v_omega * a0 / (1.0 + q);
-			hier.hier[hier.hi[2]+0].obj[1]->v[1] = 0.0;
-			hier.hier[hier.hi[2]+0].obj[1]->v[2] = 0.0;
+		hier.hier[hier.hi[2]+0].obj[1]->v[0] = -v_omega * a0 / (1.0 + q);
+		hier.hier[hier.hi[2]+0].obj[1]->v[1] = 0.0;
+		hier.hier[hier.hi[2]+0].obj[1]->v[2] = 0.0;
 
-		}
+	
 		/* call fewbody! */
 		retval = fewbody(input, &hier, &t);
 
@@ -255,7 +249,7 @@ int main(int argc, char *argv[])
 				retval.x2[0]*units.l,retval.x2[1]*units.l,retval.x2[2]*units.l,\
 				retval.v0[0]*units.v,retval.v0[1]*units.v,retval.v0[2]*units.v,retval.v1[0]*units.v,retval.v1[1]*units.v,retval.v1[2]*units.v,\
 				retval.v2[0]*units.v,retval.v2[1]*units.v,retval.v2[2]*units.v,\
-				b*units.l/FB_CONST_PARSEC,retval.DeltaLfrac,retval.DeltaEfrac,(retval.Nosc>=1?"resonance":"non-resonance"), retval.count, t*units.t/FB_CONST_YR);
+				b*units.l/FB_CONST_PARSEC,retval.DeltaLfrac,retval.DeltaEfrac,(retval.Nosc>=1?"res":"nres"), retval.count, t*units.t/FB_CONST_YR);
 		} 	
 
 		if (retval.retval == 0) {
@@ -265,7 +259,7 @@ int main(int argc, char *argv[])
 				retval.x2[0]*units.l,retval.x2[1]*units.l,retval.x2[2]*units.l,\
 				retval.v0[0]*units.v,retval.v0[1]*units.v,retval.v0[2]*units.v,retval.v1[0]*units.v,retval.v1[1]*units.v,retval.v1[2]*units.v,\
 				retval.v2[0]*units.v,retval.v2[1]*units.v,retval.v2[2]*units.v,\
-				b*units.l/FB_CONST_PARSEC,retval.DeltaLfrac,retval.DeltaEfrac,(retval.Nosc>=1?"resonance":"non-resonance"), retval.count, t*units.t/FB_CONST_YR);
+				b*units.l/FB_CONST_PARSEC,retval.DeltaLfrac,retval.DeltaEfrac,(retval.Nosc>=1?"res":"nres"), retval.count, t*units.t/FB_CONST_YR);
 		} 	
 		fclose(fbody);
 		
@@ -281,9 +275,9 @@ int main(int argc, char *argv[])
 	fend = fopen(name, "a");
 	fprintf(fend, "PARAMETERS:\n");
 	fprintf(fend,  "m00=%.6g MSUN  m01=%.6g MSUN  m1=%.6g MSUN \n", FB_M00/FB_CONST_MSUN, FB_M01/FB_CONST_MSUN, FB_M1/FB_CONST_MSUN);
-	fprintf(fend, "a0=%.6g AU  e0=%.3g\n", a0*units.l/FB_CONST_AU, e0);
+	fprintf(fend, "a0=%.6g pc  e0=%.3g\n", a0*units.l/FB_CONST_PARSEC, e0);
 	fprintf(fend, "vinf=%.6g m/s  bmin=%.6g pc  bmax=%.6g pc\n", vinf*units.v/100.0, FB_BMIN, FB_BMAX);
-	fprintf(fend, "tidaltol=%.6g  abs_acc=%.6g  rel_acc=%.6g  ncount=%d  fexp=%.6g  seed=%d  num=%d\n", FB_TIDALTOL, FB_ABSACC, FB_RELACC, FB_NCOUNT, FB_FEXP, FB_SEED, FB_PINDEX);
+	fprintf(fend, "tidaltol=%.6g  abs_acc=%.6g  rel_acc=%.6g  seed=%d  num=%d\n", FB_TIDALTOL, FB_ABSACC, FB_RELACC, FB_SEED, FB_PINDEX);
 	fclose(fend);
 
 	/* free GSL stuff */
