@@ -132,7 +132,7 @@ clean:
 	rm -f $(FEWBODY_OBJS) cluster.o triplebin.o binbin.o binsingle.o \
 	sigma_binsingle.o cluster triplebin binbin binsingle sigma_binsingle \
 	triple binsingle_simple.o binsingle_simple mybinbin mybinbin.o \
-	triple.o
+	triple.o result*
 
 mrproper: clean
 	rm -f *~ *.bak *.dat ChangeLog

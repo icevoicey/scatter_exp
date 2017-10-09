@@ -242,8 +242,7 @@ int main(int argc, char *argv[])
 		/* set the initial condition of black hole binary */		
 		q = hier.hier[hier.hi[2]+0].obj[1]->m / hier.hier[hier.hi[2]+0].obj[0]->m; // 0<q<1, m1<m0
 		v_omega = sqrt((hier.hier[hier.hi[2]+0].obj[0]->m + hier.hier[hier.hi[2]+0].obj[1]->m) / pow(a0, 3.0)); //angle velocity of black hole binary
-		
-		
+			
 		hier.hier[hier.hi[2]+0].obj[0]->x[0] = 0.0;
 		hier.hier[hier.hi[2]+0].obj[0]->x[1] = a0 / (1.0 + 1.0 / q);
 		hier.hier[hier.hi[2]+0].obj[0]->x[2] = 0.0;
@@ -259,6 +258,12 @@ int main(int argc, char *argv[])
 		hier.hier[hier.hi[2]+0].obj[1]->v[0] = -v_omega * a0 / (1.0 + q);
 		hier.hier[hier.hi[2]+0].obj[1]->v[1] = 0.0;
 		hier.hier[hier.hi[2]+0].obj[1]->v[2] = 0.0;		
+
+
+		/* trickle down the blakc hole binary properties, then back up */
+		//fb_downsync(&(hier.hier[hier.hi[2]+0]), t);
+		//fb_upsync(&(hier.hier[hier.hi[2]+0]), t);
+
 
 		/* store the initial energy and angular momentum*/
 		fb_angmom(&(hier.hier[hier.hi[1]]), hier.nstar, Li);
@@ -305,7 +310,7 @@ int main(int argc, char *argv[])
 	fprintf(fend,  "m00=%.6g MSUN  m01=%.6g MSUN  m10=%.6g MSUN  m11=%.6g MSUN \n", FB_M00/FB_CONST_MSUN, FB_M01/FB_CONST_MSUN, FB_M10/FB_CONST_MSUN, FB_M11/FB_CONST_MSUN);
 	fprintf(fend, "a0=%.6g AU  e0=%.3g\n", a0*units.l/FB_CONST_PARSEC, e0);
 	fprintf(fend, "a1min=%.6g AU  a1max=%.6g AU   e1min=%.6g  e1max=%.6g\n", FB_A1MIN/FB_CONST_AU, FB_A1MAX/FB_CONST_AU, FB_E1MIN, FB_E1MAX);
-	fprintf(fend, "vinf=%.6g m/s  bmax=%.6g pc  bmin=%.6g pc\n", vinf*units.v/100.0, FB_BMAX, FB_BMIN);
+	fprintf(fend, "vinf=%.6g m/s  bmin=%.6g pc  bmax=%.6g pc\n", vinf*units.v/100.0, FB_BMIN, FB_BMAX);
 	fprintf(fend, "tidaltol=%.6g  abs_acc=%.6g  rel_acc=%.6g  ncount=%d  fexp=%.6g  seed=%d  num=%d\n", FB_TIDALTOL, FB_ABSACC, FB_RELACC, FB_NCOUNT, FB_FEXP, FB_SEED, FB_PINDEX);
 	fclose(fend);
 

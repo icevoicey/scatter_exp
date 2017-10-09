@@ -60,37 +60,29 @@ fb_ret_t fewbody(fb_input_t input, fb_hier_t *hier, double *t)
 	retval.Rmin_j = -1;
 	retval.Nosc = 0;
 
-	retval.x0[0] = -1;
-	retval.x0[1] = -1;
-	retval.x0[2] = -1;
+	retval.x0[0] = -1.0;
+	retval.x0[1] = -1.0;
+	retval.x0[2] = -1.0;
 
-	retval.x1[0] = -1;
-	retval.x1[1] = -1;
-	retval.x1[2] = -1;
+	retval.x1[0] = -1.0;
+	retval.x1[1] = -1.0;
+	retval.x1[2] = -1.0;
 
-	retval.x2[0] = -1;
-	retval.x2[1] = -1;
-	retval.x2[2] = -1;
+	retval.x2[0] = -1.0;
+	retval.x2[1] = -1.0;
+	retval.x2[2] = -1.0;
 
-	retval.x3[0] = -1;
-	retval.x3[1] = -1;
-	retval.x3[2] = -1;
+	retval.v0[0] = -1.0;
+	retval.v0[1] = -1.0;
+	retval.v0[2] = -1.0;
 
-	retval.v0[0] = -1;
-	retval.v0[1] = -1;
-	retval.v0[2] = -1;
+	retval.v1[0] = -1.0;
+	retval.v1[1] = -1.0;
+	retval.v1[2] = -1.0;
 
-	retval.v1[0] = -1;
-	retval.v1[1] = -1;
-	retval.v1[2] = -1;
-
-	retval.v2[0] = -1;
-	retval.v2[1] = -1;
-	retval.v2[2] = -1;
-
-	retval.v3[0] = -1;
-	retval.v3[1] = -1;
-	retval.v3[2] = -1;
+	retval.v2[0] = -1.0;
+	retval.v2[1] = -1.0;
+	retval.v2[2] = -1.0;
 
 	strncpy(logentry, input.firstlogentry, FB_MAX_LOGENTRY_LENGTH);
 
@@ -239,18 +231,17 @@ fb_ret_t fewbody(fb_input_t input, fb_hier_t *hier, double *t)
 				}
 			}
 
-			/* update Ebound */
+			/* update position and velocity */
 			if (1){
 				for (k=0; k<3; k++){
 					retval.x0[k] = hier->hier[hier->hi[1]+0].x[k];
 					retval.x1[k] = hier->hier[hier->hi[1]+1].x[k];
 					retval.x2[k] = hier->hier[hier->hi[1]+2].x[k];
-					retval.x3[k] = hier->hier[hier->hi[1]+3].x[k];
 
 					retval.v0[k] = hier->hier[hier->hi[1]+0].v[k];
 					retval.v1[k] = hier->hier[hier->hi[1]+1].v[k];
 					retval.v2[k] = hier->hier[hier->hi[1]+2].v[k];
-					retval.v3[k] = hier->hier[hier->hi[1]+3].v[k];
+				printf("%.6g,%d,%d\n", retval.Rmin,retval.Rmin_i,retval.Rmin_j);
 				}
 			}
 
