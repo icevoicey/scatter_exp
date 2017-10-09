@@ -52,7 +52,7 @@
 #define FB_ROOTSOLVER_REL_ACC 1.0e-11
 #define FB_MAX_STRING_LENGTH 2048
 #define FB_MAX_LOGENTRY_LENGTH (32 * FB_MAX_STRING_LENGTH)
-
+#define FB_NMAX 1.5e5
 
 /* a struct containing the units used */
 typedef struct{

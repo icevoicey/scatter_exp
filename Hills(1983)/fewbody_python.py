@@ -55,7 +55,7 @@ def l_unitf(a1=a01):
 def t_unitf(l_unit=l_unitf(),v_unit=v_unitf()):
     return l_unit/v_unit
 
-def r_tidf(tidal_tol=1e-5,m0=m0,m1=m1,m2=m2,a01=a01,e01=e01):
+def r_tidf(tidal_tol=2.5e-4,m0=m0,m1=m1,m2=m2,a01=a01,e01=e01):
     m01=m0+m1
     r01=(2*(m01+m2)*m2/(m01*m2*tidal_tol))**(1/3)*a01*(1+e01)
     return r01

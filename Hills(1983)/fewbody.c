@@ -157,7 +157,7 @@ fb_ret_t fewbody(fb_input_t input, fb_hier_t *hier, double *t)
 	texpand = 0.0;
 	clk_tck = sysconf(_SC_CLK_TCK);
 	retval.tcpu = 0.0;
-	while (*t < input.tstop && retval.tcpu < input.tcpustop && !done) {
+	while (*t < input.tstop && retval.tcpu < input.tcpustop && retval.count < FB_NMAX && !done) {
 		/* take one step */
 		slast = s;
 		status = gsl_odeiv_evolve_apply(ode_evolve, ode_control, ode_step, &ode_sys, &s, sstop, &h, y);

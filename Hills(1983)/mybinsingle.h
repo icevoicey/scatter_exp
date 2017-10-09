@@ -33,8 +33,8 @@
 #define FB_DT 1.0 /* approximate output dt */
 #define FB_TCPUSTOP 1200.0 /* in seconds */
 
-#define FB_ABSACC 1.0e-9 /* absolute accuracy of integrator */
-#define FB_RELACC 1.0e-9 /* relative accuracy of integrator */
+#define FB_ABSACC 1.0e-8 /* absolute accuracy of integrator */
+#define FB_RELACC 1.0e-8 /* relative accuracy of integrator */
 #define FB_NCOUNT 1 /* number of timesteps between calls to classify() */
 
 #define FB_KS 0
@@ -42,9 +42,9 @@
 #define FB_DEBUG 0
 
 #define FB_SEED 1
-#define FB_BMIN 0.0
-#define FB_BMAX 0.0 /* impact parameter in unit of pc */
-#define FB_PINDEX 50 /* total times we need */
+#define FB_BMIN 0.7
+#define FB_BMAX 0.7 /* impact parameter in unit of pc */
+#define FB_PINDEX 10 /* total times we need */
 
  
 void print_usage(FILE *stream);
