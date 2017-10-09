@@ -48,7 +48,7 @@ int calc_units(fb_obj_t *obj[2], fb_units_t *units)
 /* the main attraction */
 int main(int argc, char *argv[])
 {
-	int pindex = FB_PINDEX, pcount, j, seed, myv;
+	int pindex = FB_PINDEX, pcount, j, seed;
 	double a0, a1, e0, e1;
 	double rtid, vtid, vinf, b, m0, m1, M, mu, Lint[3], Li[3], t;
 	double sigma, r_inf, q, v_omega;
@@ -277,23 +277,25 @@ int main(int argc, char *argv[])
 		FILE *fbody;
 		fbody=fopen(name, "a");
 		if (retval.retval == 1) {
-			fprintf(fbody, "1,%s,%s,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%s\n",
+			fprintf(fbody, "1,%s,%s,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%s,%ld,%.6g\n",
 				fb_sprint_hier(hier, string1), fb_sprint_hier_hr(hier, string2),\
-				retval.x0[0]*units.l,retval.x0[1]*units.l,retval.x0[2]*units.l,retval.x1[0]*units.l,retval.x1[1]*units.l,retval.x1[2]*units.l,\
-				retval.x2[0]*units.l,retval.x2[1]*units.l,retval.x2[2]*units.l,retval.x3[0]*units.l,retval.x3[1]*units.l,retval.x3[2]*units.l,\
-				retval.v0[0]*units.v,retval.v0[1]*units.v,retval.v0[2]*units.v,retval.v1[0]*units.v,retval.v1[1]*units.v,retval.v1[2]*units.v,\
-				retval.v2[0]*units.v,retval.v2[1]*units.v,retval.v2[2]*units.v,retval.v3[0]*units.v,retval.v3[1]*units.v,retval.v3[2]*units.v,\
-				a1*units.l/FB_CONST_AU, e1, b*units.l/FB_CONST_PARSEC,retval.DeltaLfrac,retval.DeltaEfrac,(retval.Nosc>=1?"resonance":"non-resonance"));
+				retval.x0[0]*units.l, retval.x0[1]*units.l, retval.x0[2]*units.l, retval.x1[0]*units.l, retval.x1[1]*units.l, retval.x1[2]*units.l,\
+				retval.x2[0]*units.l, retval.x2[1]*units.l, retval.x2[2]*units.l, retval.x3[0]*units.l, retval.x3[1]*units.l, retval.x3[2]*units.l,\
+				retval.v0[0]*units.v, retval.v0[1]*units.v, retval.v0[2]*units.v, retval.v1[0]*units.v, retval.v1[1]*units.v, retval.v1[2]*units.v,\
+				retval.v2[0]*units.v, retval.v2[1]*units.v, retval.v2[2]*units.v, retval.v3[0]*units.v, retval.v3[1]*units.v, retval.v3[2]*units.v,\
+				a1*units.l, e1, b*units.l, retval.DeltaLfrac, retval.DeltaEfrac,\
+				(retval.Nosc>=1?"resonance":"non-resonance"), retval.count, t*units.t/FB_CONST_YR);
 		} 
 
 		if (retval.retval == 0) {
-			fprintf(fbody, "0,%s,%s,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%s\n",
+			fprintf(fbody, "0,%s,%s,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%s,%ld,%.6g\n",
 				fb_sprint_hier(hier, string1), fb_sprint_hier_hr(hier, string2),\
-				retval.x0[0]*units.l,retval.x0[1]*units.l,retval.x0[2]*units.l,retval.x1[0]*units.l,retval.x1[1]*units.l,retval.x1[2]*units.l,\
-				retval.x2[0]*units.l,retval.x2[1]*units.l,retval.x2[2]*units.l,retval.x3[0]*units.l,retval.x3[1]*units.l,retval.x3[2]*units.l,\
-				retval.v0[0]*units.v,retval.v0[1]*units.v,retval.v0[2]*units.v,retval.v1[0]*units.v,retval.v1[1]*units.v,retval.v1[2]*units.v,\
-				retval.v2[0]*units.v,retval.v2[1]*units.v,retval.v2[2]*units.v,retval.v3[0]*units.v,retval.v3[1]*units.v,retval.v3[2]*units.v,\
-				a1*units.l/FB_CONST_AU, e1, b*units.l/FB_CONST_PARSEC,retval.DeltaLfrac,retval.DeltaEfrac,(retval.Nosc>=1?"resonance":"non-resonance"));
+				retval.x0[0]*units.l, retval.x0[1]*units.l, retval.x0[2]*units.l, retval.x1[0]*units.l, retval.x1[1]*units.l, retval.x1[2]*units.l,\
+				retval.x2[0]*units.l, retval.x2[1]*units.l, retval.x2[2]*units.l, retval.x3[0]*units.l, retval.x3[1]*units.l, retval.x3[2]*units.l,\
+				retval.v0[0]*units.v, retval.v0[1]*units.v, retval.v0[2]*units.v, retval.v1[0]*units.v, retval.v1[1]*units.v, retval.v1[2]*units.v,\
+				retval.v2[0]*units.v, retval.v2[1]*units.v, retval.v2[2]*units.v, retval.v3[0]*units.v, retval.v3[1]*units.v, retval.v3[2]*units.v,\
+				a1*units.l, e1, b*units.l, retval.DeltaLfrac, retval.DeltaEfrac,\
+				(retval.Nosc>=1?"resonance":"non-resonance"), retval.count, t*units.t/FB_CONST_YR);
 		} 		
 		fclose(fbody);
 		
@@ -310,7 +312,7 @@ int main(int argc, char *argv[])
 	fprintf(fend,  "m00=%.6g MSUN  m01=%.6g MSUN  m10=%.6g MSUN  m11=%.6g MSUN \n", FB_M00/FB_CONST_MSUN, FB_M01/FB_CONST_MSUN, FB_M10/FB_CONST_MSUN, FB_M11/FB_CONST_MSUN);
 	fprintf(fend, "a0=%.6g AU  e0=%.3g\n", a0*units.l/FB_CONST_PARSEC, e0);
 	fprintf(fend, "a1min=%.6g AU  a1max=%.6g AU   e1min=%.6g  e1max=%.6g\n", FB_A1MIN/FB_CONST_AU, FB_A1MAX/FB_CONST_AU, FB_E1MIN, FB_E1MAX);
-	fprintf(fend, "vinf=%.6g m/s  bmin=%.6g pc  bmax=%.6g pc\n", vinf*units.v/100.0, FB_BMIN, FB_BMAX);
+	fprintf(fend, "vinf=%.6g km/s  bmin=%.6g pc  bmax=%.6g pc\n", vinf*units.v/1.0e5, FB_BMIN, FB_BMAX);
 	fprintf(fend, "tidaltol=%.6g  abs_acc=%.6g  rel_acc=%.6g  ncount=%d  fexp=%.6g  seed=%d  num=%d\n", FB_TIDALTOL, FB_ABSACC, FB_RELACC, FB_NCOUNT, FB_FEXP, FB_SEED, FB_PINDEX);
 	fclose(fend);
 
