@@ -48,7 +48,7 @@ int calc_units(fb_obj_t *obj[2], fb_units_t *units)
 int main(int argc, char *argv[])
 {
 	int pindex = FB_PINDEX, pcount, j, seed;
-	double a0, e0, test;
+	double a0, e0;
 	double rtid, vtid, vinf, b, m0, m1, M, mu, t;
 	double sigma, r_inf, q, v_omega,v_c;
 	double x[3], x0[3], x1[3], x2[3], x3[3], v[3], v0[3], v1[3], v2[3], v3[3];
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	char string1[FB_MAX_STRING_LENGTH], string2[FB_MAX_STRING_LENGTH];
 	gsl_rng *rng;
 	const gsl_rng_type *rng_type=gsl_rng_mt19937;
-	double t_hubble = 1.3e10*365*24*60*60; // hubble time of the universe set as 13 billion years
+	double t_hubble = 1.3e10 * 365 * 24 * 60 * 60; // hubble time of the universe set as 13 billion years
 
 	/* initialize GSL rng */
 	gsl_rng_env_setup();
@@ -239,36 +239,32 @@ int main(int argc, char *argv[])
 		hier.hier[hier.hi[2]+0].obj[1]->v[1] = 0.0;
 		hier.hier[hier.hi[2]+0].obj[1]->v[2] = 0.0;
 
-		
-		/* trickle down the binary properties, then back up */
-		//fb_downsync(&(hier.hier[hier.hi[2]+0]), t);
-		//fb_upsync(&(hier.hier[hier.hi[2]+0]), t);
 
 		/* call fewbody! */
 		retval = fewbody(input, &hier, &t);
-		test =my_r*units.l/FB_CONST_PARSEC;
+
 		/* save the data into result file */
 		
 		FILE *fbody;
 		fbody=fopen(name, "a");
 		if (retval.retval == 1) {
-			fprintf(fbody, "1,%s,%s,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%s\n",
-				fb_sprint_hier(hier, string1), fb_sprint_hier_hr(hier, string2),\
-				retval.x0[0]*units.l/FB_CONST_PARSEC,retval.x0[1]*units.l/FB_CONST_PARSEC,retval.x0[2]*units.l/FB_CONST_PARSEC,retval.x1[0]*units.l/FB_CONST_PARSEC,retval.x1[1]*units.l/FB_CONST_PARSEC,retval.x1[2]*units.l/FB_CONST_PARSEC,\
-				retval.x2[0]*units.l/FB_CONST_PARSEC,retval.x2[1]*units.l/FB_CONST_PARSEC,retval.x2[2]*units.l/FB_CONST_PARSEC,\
-				retval.v0[0]*units.v,retval.v0[1]*units.v,retval.v0[2]*units.v,retval.v1[0]*units.v,retval.v1[1]*units.v,retval.v1[2]*units.v,\
-				retval.v2[0]*units.v,retval.v2[1]*units.v,retval.v2[2]*units.v,\
-				b*units.l/FB_CONST_PARSEC,retval.DeltaLfrac,retval.DeltaEfrac,(retval.Nosc>=1?"resonance":"non-resonance"));
-		} 
-
-		if (retval.retval == 0) {
-			fprintf(fbody, "0,%s,%s,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%s\n",
+			fprintf(fbody, "1,%s,%s,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%s,%ld,%.6g\n",
 				fb_sprint_hier(hier, string1), fb_sprint_hier_hr(hier, string2),\
 				retval.x0[0]*units.l,retval.x0[1]*units.l,retval.x0[2]*units.l,retval.x1[0]*units.l,retval.x1[1]*units.l,retval.x1[2]*units.l,\
 				retval.x2[0]*units.l,retval.x2[1]*units.l,retval.x2[2]*units.l,\
 				retval.v0[0]*units.v,retval.v0[1]*units.v,retval.v0[2]*units.v,retval.v1[0]*units.v,retval.v1[1]*units.v,retval.v1[2]*units.v,\
 				retval.v2[0]*units.v,retval.v2[1]*units.v,retval.v2[2]*units.v,\
-				b*units.l/FB_CONST_PARSEC,retval.DeltaLfrac,retval.DeltaEfrac,(retval.Nosc>=1?"resonance":"non-resonance"));
+				b*units.l/FB_CONST_PARSEC,retval.DeltaLfrac,retval.DeltaEfrac,(retval.Nosc>=1?"resonance":"non-resonance"), retval.count, t*units.t/FB_CONST_YR);
+		} 	
+
+		if (retval.retval == 0) {
+			fprintf(fbody, "0,%s,%s,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%.6g,%s,%ld,%.6g\n",
+				fb_sprint_hier(hier, string1), fb_sprint_hier_hr(hier, string2),\
+				retval.x0[0]*units.l,retval.x0[1]*units.l,retval.x0[2]*units.l,retval.x1[0]*units.l,retval.x1[1]*units.l,retval.x1[2]*units.l,\
+				retval.x2[0]*units.l,retval.x2[1]*units.l,retval.x2[2]*units.l,\
+				retval.v0[0]*units.v,retval.v0[1]*units.v,retval.v0[2]*units.v,retval.v1[0]*units.v,retval.v1[1]*units.v,retval.v1[2]*units.v,\
+				retval.v2[0]*units.v,retval.v2[1]*units.v,retval.v2[2]*units.v,\
+				b*units.l/FB_CONST_PARSEC,retval.DeltaLfrac,retval.DeltaEfrac,(retval.Nosc>=1?"resonance":"non-resonance"), retval.count, t*units.t/FB_CONST_YR);
 		} 	
 		fclose(fbody);
 		
@@ -276,7 +272,6 @@ int main(int argc, char *argv[])
 		fb_free_hier(hier);
 
 		printf("%d\n", pcount);
-		printf("%.6g\n",test);
 	}
 
 	/* save important values of paramaters at the end of result file */

@@ -241,7 +241,7 @@ fb_ret_t fewbody(fb_input_t input, fb_hier_t *hier, double *t)
 					retval.v0[k] = hier->hier[hier->hi[1]+0].v[k];
 					retval.v1[k] = hier->hier[hier->hi[1]+1].v[k];
 					retval.v2[k] = hier->hier[hier->hi[1]+2].v[k];
-				printf("%.6g,%d,%d\n", retval.Rmin,retval.Rmin_i,retval.Rmin_j);
+				//printf("%.6g,%d,%d\n", retval.Rmin,retval.Rmin_i,retval.Rmin_j);
 				}
 			}
 
